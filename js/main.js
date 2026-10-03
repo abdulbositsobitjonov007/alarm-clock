@@ -1,42 +1,41 @@
-let setAlarm = document.getElementById("set-alarm");
-let stopAlarm = document.getElementById("stop-alarm");
-let playAlarm = document.getElementById("play-alarm");
-let pauseAlarm = document.getElementById("pause-alarm");
+const setAlarm = document.getElementById("set-alarm");
+const stopAlarm = document.getElementById("stop-alarm");
+const audio = document.getElementById("audio");
+const alarmForm = document.getElementById("alarm");
+const timeInput = document.getElementById("time");
 
-let audio = document.getElementById("audio");
-let alarmTime = document.getElementById("alarm");
-let selectedTime;
+let selectedTime = null;
+let isPlaying = false;
 
-
-
-alarmTime.addEventListener("submit", function(e){
+alarmForm.addEventListener("submit", function(e) {
     e.preventDefault();
-    selectedTime = e.target[0].value
+    selectedTime = timeInput.value;
+    isPlaying = false;
+    alert(`Будильник установлен на ${selectedTime}`);
 });
 
-playAlarm.addEventListener("click", function(){
-    audio.play()
+stopAlarm.addEventListener("click", function() {
+    audio.pause();
+    audio.currentTime = 0; 
+    selectedTime = null; 
+    isPlaying = false;
 });
- 
 
+setInterval(() => {
+    if (!selectedTime) return; 
+    const date = new Date();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const realTime = `${hours}:${minutes}`;
 
-let stopint = setInterval(() => {
-    let date = new Date();
-
-    let time = date.toTimeString().split(" ")[0];
-    let realTime = time.split(":").slice(0, 2).join(":");
-
-    if(selectedTime === realTime){
-        audio.play()
+    if (selectedTime === realTime && !isPlaying) {
+        audio.currentTime = 0;
+        audio.play();
+        isPlaying = true;
+    }else if (selectedTime !== realTime && isPlaying) {
+        audio.pause();
+        audio.currentTime = 0;
+        selectedTime = null;
+        isPlaying = false;
     }
 }, 1000);
-
-pauseAlarm.addEventListener("click", function(){
-    audio.pause();
-    clearInterval(stopint)
-});
-
-stopAlarm.addEventListener("click", function(){
-    audio.pause();
-    clearInterval(stopint);
-})
